@@ -3,13 +3,13 @@ const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, confirmPassword, phone } = req.body;
 
     // Validation
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: name, email, password',
+        message: 'Missing required fields: name, email, password, confirmPassword',
       });
     }
 
@@ -23,10 +23,10 @@ exports.register = async (req, res) => {
     }
 
     // Validate password strength
-    if (password.length < 6) {
+    if (password.length < 6 || password !== confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 6 characters long',
+        message: 'Password must be at least 6 characters long and match the confirmation password',
       });
     }
 

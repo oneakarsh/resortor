@@ -21,6 +21,12 @@ const userSchema = new mongoose.Schema(
       minlength: 6,
       select: false,
     },
+    confirmPassword: {
+      type: String,
+      required: true,
+      minlength: 6,
+      select: false,
+    },
     phone: {
       type: String,
       trim: true,
