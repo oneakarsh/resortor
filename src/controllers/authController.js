@@ -40,7 +40,7 @@ exports.register = async (req, res) => {
     }
 
     // Create new user
-    const user = new User({ name, email, password, phone });
+    const user = new User({ name, email, password, confirmPassword, phone });
     await user.save();
 
     // Generate token
