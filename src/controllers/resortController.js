@@ -2,12 +2,42 @@ const Resort = require('../models/Resort');
 
 exports.getAllResorts = async (req, res) => {
   try {
-    const resorts = await Resort.find({ isActive: true });
-    res.json({
-      message: 'Resorts fetched successfully',
-      count: resorts.length,
-      data: resorts,
-    });
+    const { amenities, minRate, maxRate, location } = req.query;
+
+    const filter = { isActive: true };
+
+    if (location) {
+      filter.location = { $regex: location, $options: 'i' };
+    }
+
+    if (amenities) {
+      let amenArray = [];
+      if (typeof amenities === 'string') {
+        try {
+          const parsed = JSON.parse(amenities);
+          if (Array.isArray(parsed)) amenArray = parsed;
+        } catch (e) {
+          amenArray = amenities.split(',').map((a) => a.trim()).filter(Boolean);
+        }
+      } else if (Array.isArray(amenities)) {
+        amenArray = amenities;
+      }
+
+      if (amenArray.length) {
+        filter.amenities = { $all: amenArray };
+      }
+    }
+
+    if (minRate || maxRate) {
+      const priceFilter = {};
+      if (minRate && !Number.isNaN(Number(minRate))) priceFilter.$gte = Number(minRate);
+      if (maxRate && !Number.isNaN(Number(maxRate))) priceFilter.$lte = Number(maxRate);
+      if (Object.keys(priceFilter).length) filter.pricePerNight = priceFilter;
+    }
+
+    const resorts = await Resort.find(filter);
+
+    res.json({ message: 'Resorts fetched successfully', count: resorts.length, data: resorts });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch resorts', error: error.message });
   }
